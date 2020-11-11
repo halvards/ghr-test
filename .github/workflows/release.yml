@@ -32,6 +32,11 @@ jobs:
         go get github.com/google/ko/cmd/ko@v0.6.2-0.20201109152754-715c03ebc2b1
       env:
         GO111MODULE: on
+    - name: Print env
+      run: |
+        go env GOPATH
+        echo $PATH
+        pwd
     - name: Build and push container images
       run: |
         echo -n 'image_digest=' >> $GITHUB_ENV
