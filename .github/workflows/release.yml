@@ -26,17 +26,18 @@ jobs:
         GOOS=linux GOARCH=arm64 go build -o ghr-test_linux_arm64 .
     - name: Create checksums
       run: shasum -a 256 ghr-test_* > SHA256SUMS
-    - name: Install ko
+    - name: Install crane and ko
       run: |
         cd $(mktemp -d)
-        go get github.com/google/ko/cmd/ko@v0.6.2-0.20201109152754-715c03ebc2b1
+        go get github.com/google/go-containerregistry/cmd/crane
+        go get github.com/google/ko/cmd/ko
       env:
         GO111MODULE: on
     - name: Build and push container images
       run: |
         echo -n 'image_digest=' >> $GITHUB_ENV
-        $(go env GOPATH)/bin/ko auth login docker.pkg.github.com -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-        $(go env GOPATH)/bin/ko publish --base-import-paths --platform all . >> $GITHUB_ENV
+        $(go env GOPATH)/bin/crane auth login docker.pkg.github.com -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+        $(go env GOPATH)/bin/ko publish --base-import-paths --platform linux/amd64 --tags latest,${GITHUB_REF##*/} . >> $GITHUB_ENV
       env:
         KO_DOCKER_REPO: docker.pkg.github.com/${{ github.repository }}
     - name: Create release
