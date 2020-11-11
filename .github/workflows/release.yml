@@ -40,6 +40,15 @@ jobs:
         $(go env GOPATH)/bin/ko publish --base-import-paths --platform linux/amd64 --tags latest,${GITHUB_REF##*/} . >> $GITHUB_ENV
       env:
         KO_DOCKER_REPO: docker.pkg.github.com/${{ github.repository }}
+    - name: Create release body file
+      run: |
+        echo '## Images' > ${{ runner.temp }}/body.md
+        echo "    docker.pkg.github.com/${{ github.repository }}/${{ github.event.repository.name }}:${GITHUB_REF##*/}\n" >> ${{ runner.temp }}/body.md
+        echo "    gcr.io/project-id/${image_digest##*@}" >> ${{ runner.temp }}/body.md
+        $(go env GOPATH)/bin/crane auth login docker.pkg.github.com -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+        $(go env GOPATH)/bin/ko publish --base-import-paths --platform linux/amd64 --tags latest,${GITHUB_REF##*/} . >> $GITHUB_ENV
+      env:
+        KO_DOCKER_REPO: docker.pkg.github.com/${{ github.repository }}
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
@@ -48,9 +57,7 @@ jobs:
       with:
         tag_name: ${{ github.ref }}
         release_name: ${{ github.ref }}
-        body: |
-          docker.pkg.github.com/${{ github.repository }}/${{ github.event.repository.name }}:${GITHUB_REF##*/}
-          $image_digest
+        body_path: ${{ runner.temp }}/body.md
     - name: Upload asset darwin amd64
       uses: actions/upload-release-asset@v1
       env:
