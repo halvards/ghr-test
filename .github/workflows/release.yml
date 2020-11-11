@@ -28,20 +28,16 @@ jobs:
       run: shasum -a 256 ghr-test_* > SHA256SUMS
     - name: Install ko
       run: |
-        cd $(mktemp -d)
         go get github.com/google/ko/cmd/ko@v0.6.2-0.20201109152754-715c03ebc2b1
       env:
         GO111MODULE: on
-    - name: Print env
-      run: |
-        go env GOPATH
-        echo $PATH
-        pwd
+      with:
+        path: ${{ runner.temp }}
     - name: Build and push container images
       run: |
         echo -n 'image_digest=' >> $GITHUB_ENV
-        ko auth login docker.pkg.github.com -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-        ko publish --base-import-paths --platform all . >> $GITHUB_ENV
+        $(go env GOPATH)/bin/ko auth login docker.pkg.github.com -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+        $(go env GOPATH)/bin/ko publish --base-import-paths --platform all . >> $GITHUB_ENV
       env:
         KO_DOCKER_REPO: docker.pkg.github.com/${{ github.repository }}
     - name: Create release
