@@ -26,6 +26,8 @@ jobs:
             go build -o ghr-test_${GOOS}_${GOARCH} .
           done
         done
+    - name: Create checksums
+      run: shasum -a 256 ghr-test_* > SHA256SUMS
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
@@ -33,7 +35,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        release_name: ${{ github.ref }}
     - name: Upload asset darwin amd64
       uses: actions/upload-release-asset@v1
       env:
@@ -43,7 +45,7 @@ jobs:
         asset_path: ghr-test_darwin_amd64
         asset_name: ghr-test_darwin_amd64
         asset_content_type: application/octet-stream
-    - name: Upload asset darwin arm64
+    - name: Upload binary darwin arm64
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -52,7 +54,7 @@ jobs:
         asset_path: ghr-test_darwin_arm64
         asset_name: ghr-test_darwin_arm64
         asset_content_type: application/octet-stream
-    - name: Upload asset linux amd64
+    - name: Upload binary linux amd64
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -61,7 +63,7 @@ jobs:
         asset_path: ghr-test_linux_amd64
         asset_name: ghr-test_linux_amd64
         asset_content_type: application/octet-stream
-    - name: Upload asset linux arm64
+    - name: Upload binary linux arm64
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -70,3 +72,12 @@ jobs:
         asset_path: ghr-test_linux_arm64
         asset_name: ghr-test_linux_arm64
         asset_content_type: application/octet-stream
+    - name: Upload checksum file
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: SHA256SUMS
+        asset_name: SHA256SUMS
+        asset_content_type: text/plain
