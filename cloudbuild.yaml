@@ -46,7 +46,7 @@ steps:
     /workspace/.gopath/bin/ko resolve --filename manifests --platform all --preserve-import-paths --tags latest,$_TAG_NAME | head -n-2 > deploy/ghr-test.yaml
   env:
   - 'KO_DOCKER_REPO=gcr.io/$_PROJECT_ID'
-- id: deploy-key
+- id: manifest
   name: gcr.io/cloud-builders/gcloud
   entrypoint: bash
   args:
@@ -54,6 +54,7 @@ steps:
   - pipefail
   - -c
   - |-
+    mkdir -p /root/.ssh
     gcloud secrets versions access latest --secret $_GITHUB_SECRET_NAME > /root/.ssh/id_github
     chmod 600 /root/.ssh/id_github
     cat << EOF > /root/.ssh/config
