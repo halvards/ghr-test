@@ -62,10 +62,10 @@ steps:
     IdentityFile /root/.ssh/id_github
     EOF
     ssh-keyscan -t rsa github.com > /root/.ssh/known_hosts
-    # git config --add user.name "Cloud Build"
-    # git config --add user.email cloudbuild@example.com
+    git config --add user.name "Cloud Build"
+    git config --add user.email cloudbuild@example.com
     git add deploy/ghr-test.yaml
-    git commit -m "Update deploy manifest for $_TAG_NAME" -u "Cloud Build" -e "cloudbuild@example.com"
+    git commit -m "Update deploy manifest for $_TAG_NAME"
     git push origin main
   # volumes:
   # - name: 'ssh'
