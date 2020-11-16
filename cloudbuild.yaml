@@ -43,7 +43,7 @@ steps:
   - pipefail
   - -c
   - |-
-    /workspace/.gopath/bin/ko resolve --filename manifests --platform all --preserve-import-paths --tags latest,$_TAG_NAME | head -n-2 > deploy/ghr-test.yaml
+    /workspace/.gopath/bin/ko resolve --filename manifests --platform all --preserve-import-paths --tags latest,$TAG_NAME | head -n-2 > deploy/ghr-test.yaml
   env:
   - 'KO_DOCKER_REPO=gcr.io/$_PROJECT_ID'
 - id: manifest
@@ -66,11 +66,14 @@ steps:
     git config --add user.email cloudbuild@example.com
     # git config --unset credential.helper
     git add deploy/ghr-test.yaml
-    git commit -m "Update deploy manifest for $_TAG_NAME"
-    echo before
-    git config -l
-    echo after
-    git push origin HEAD:refs/heads/main
+    git commit -m "Update deploy manifest for $TAG_NAME"
+    # echo before
+    # git config --list
+    # git config --global --list
+    # echo after
+    git remote set-url origin git@github.com:halvards/ghr-test.git
+    git push origin main
+    # git push origin HEAD:refs/heads/main
   # volumes:
   # - name: 'ssh'
   #   path: /root/.ssh
@@ -84,9 +87,9 @@ options:
   - 'TAG_NAME=$TAG_NAME'
   - 'PROJECT_ID=$PROJECT_ID'
   logging: GCS_ONLY
+  substitutionOption: ALLOW_LOOSE
 substitutions:
   _GO_IMAGE: golang:1.15
   _GITHUB_SECRET_NAME: ghr-test-github-deploy-key
   _PROJECT_ID: $PROJECT_ID
-  _TAG_NAME: $TAG_NAME
 timeout: 600s
