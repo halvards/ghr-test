@@ -14,36 +14,49 @@
 
 steps:
 - id: ko
-  name: gcr.io/cloud-builders/go
+  name: golang:1.15
   dir: tools
   entrypoint: go
   args:
   - get
   - github.com/google/ko/cmd/ko
+  env:
+  - 'GO111MODULE=on'
 - id: image
-  name: gcr.io/cloud-builders/go
+  name: golang:1.15
   entrypoint: /workspace/.gopath/bin/ko
   args:
   - publish
   - .
   - --base-import-paths
   - --local
-- id: tag
+  - --platform=all
+- id: tag-latest
   name: gcr.io/cloud-builders/docker
   args:
   - tag
   - ko.local/ghr-test
-  - gcr.io/$_PROJECT_ID/github.com/halvards/ghr-test
+  - gcr.io/$_PROJECT_ID/github.com/halvards/ghr-test:latest
+- id: tag-version
+  name: gcr.io/cloud-builders/docker
+  args:
+  - tag
+  - ko.local/ghr-test
+  - gcr.io/$_PROJECT_ID/github.com/halvards/ghr-test:$_TAG_NAME
 options:
   dynamic_substitutions: true
   env:
+  - 'CGO_ENABLED=0'
   - 'GOCACHE=/workspace/.gocache'
   - 'GOFLAGS=-mod=readonly'
   - 'GOPATH=/workspace/.gopath'
+  - 'TAG_NAME=$TAG_NAME'
   - 'PROJECT_ID=$PROJECT_ID'
   logging: GCS_ONLY
 substitutions:
   _PROJECT_ID: $PROJECT_ID
+  _TAG_NAME: $TAG_NAME
 timeout: 600s
 images:
-- gcr.io/$_PROJECT_ID/github.com/halvards/ghr-test
+- gcr.io/$_PROJECT_ID/github.com/halvards/ghr-test:latest
+- gcr.io/$_PROJECT_ID/github.com/halvards/ghr-test:$_TAG_NAME
