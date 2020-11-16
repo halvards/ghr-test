@@ -71,9 +71,10 @@ steps:
     # git config --list
     # git config --global --list
     # echo after
-    git remote set-url origin git@github.com:halvards/ghr-test.git
-    git push origin main
-    # git push origin HEAD:refs/heads/main
+    # git remote set-url origin git@github.com:halvards/ghr-test.git
+    git remote set-url origin $(git remote get-url origin | sed -r 's:https\://([^/]+)/(.*\.git):git@\1\:\2:')
+    # git push origin main
+    git push origin HEAD:refs/heads/main
   # volumes:
   # - name: 'ssh'
   #   path: /root/.ssh
