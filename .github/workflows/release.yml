@@ -14,6 +14,9 @@ jobs:
       uses: actions/setup-go@v1
       with:
         go-version: 1.15
+    - name: Env
+      run: |
+        go env
     - name: Names
       run: |
         echo MODULE_NAME=$(go list | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
@@ -29,11 +32,9 @@ jobs:
       run: shasum -a 256 ghr-test_* > SHA256SUMS
     - name: Install crane and ko
       run: |
-        cd $(mktemp -d)
         go get github.com/google/go-containerregistry/cmd/crane
         go get github.com/google/ko/cmd/ko
-      env:
-        GO111MODULE: on
+      working-directory: tools
     - name: Build and push container images
       run: |
         echo -n 'IMAGE_DIGEST=' >> $GITHUB_ENV
@@ -44,10 +45,10 @@ jobs:
     - name: Create release body file
       run: |
         echo '## Images' > ${{ runner.temp }}/body.md
-        echo "    docker.pkg.github.com/$IMAGE_REPO/$IMAGE_NAME:$IMAGE_TAG" >> ${{ runner.temp }}/body.md
-        echo "    {IMAGE_DIGEST##*@}"
+        echo "    gcr.io/project-id/$MODULE_NAME:$IMAGE_TAG (multi-arch)" >> ${{ runner.temp }}/body.md
         echo "" >> ${{ runner.temp }}/body.md
-        echo "    gcr.io/project-id/$MODULE_NAME:$IMAGE_TAG" >> ${{ runner.temp }}/body.md
+        echo "    docker.pkg.github.com/$IMAGE_REPO/$IMAGE_NAME:$IMAGE_TAG (linux/amd64)" >> ${{ runner.temp }}/body.md
+        echo "    ${IMAGE_DIGEST##*@}"
     - name: Create release
       id: create_release
       uses: actions/create-release@v1

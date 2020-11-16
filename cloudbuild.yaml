@@ -13,6 +13,11 @@
 # limitations under the License.
 
 steps:
+- id: env
+  name: golang:1.15
+  entrypoint: go
+  args:
+  - env
 - id: ko
   name: golang:1.15
   dir: tools
@@ -28,21 +33,11 @@ steps:
   args:
   - publish
   - .
-  - --base-import-paths
-  - --local
-  - --platform=linux/amd64
-- id: tag-latest
-  name: gcr.io/cloud-builders/docker
-  args:
-  - tag
-  - ko.local/ghr-test
-  - gcr.io/$_PROJECT_ID/github.com/halvards/ghr-test:latest
-- id: tag-version
-  name: gcr.io/cloud-builders/docker
-  args:
-  - tag
-  - ko.local/ghr-test
-  - gcr.io/$_PROJECT_ID/github.com/halvards/ghr-test:$_TAG_NAME
+  - --preserve-import-paths
+  - --platform=all
+  - --tags=latest,$_TAG_NAME
+  env:
+  - 'KO_DOCKER_REPO=gcr.io/$_PROJECT_ID'
 options:
   dynamic_substitutions: true
   env:
@@ -57,6 +52,3 @@ substitutions:
   _PROJECT_ID: $PROJECT_ID
   _TAG_NAME: $TAG_NAME
 timeout: 600s
-images:
-- gcr.io/$_PROJECT_ID/github.com/halvards/ghr-test:latest
-- gcr.io/$_PROJECT_ID/github.com/halvards/ghr-test:$_TAG_NAME
