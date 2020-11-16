@@ -64,9 +64,12 @@ steps:
     ssh-keyscan -t rsa github.com > /root/.ssh/known_hosts
     git config --add user.name "Cloud Build"
     git config --add user.email cloudbuild@example.com
+    git config --unset credential.helper
     git add deploy/ghr-test.yaml
     git commit -m "Update deploy manifest for $_TAG_NAME"
+    echo before
     git config -l
+    echo after
     git push origin HEAD:refs/heads/main
   # volumes:
   # - name: 'ssh'
