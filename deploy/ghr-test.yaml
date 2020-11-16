@@ -5,4 +5,4 @@ metadata:
 spec:
   containers:
     - name: ghr-test
-      image: gcr.io/project-id/github.com/halvards/ghr-test
+      image: gcr.io/halvard-193600/github.com/halvards/ghr-test@sha256:24cd04ef6ca74cd8aa535166f35be18579cf570383dbb8fe870aa74bdaf88ea6
