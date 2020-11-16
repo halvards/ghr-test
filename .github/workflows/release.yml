@@ -45,8 +45,9 @@ jobs:
       run: |
         echo '## Images' > ${{ runner.temp }}/body.md
         echo "    docker.pkg.github.com/$IMAGE_REPO/$IMAGE_NAME:$IMAGE_TAG" >> ${{ runner.temp }}/body.md
+        echo "    {IMAGE_DIGEST##*@}"
         echo "" >> ${{ runner.temp }}/body.md
-        echo "    gcr.io/project-id/github.com/${MODULE_NAME}@${IMAGE_DIGEST##*@}" >> ${{ runner.temp }}/body.md
+        echo "    gcr.io/project-id/$MODULE_NAME:$IMAGE_TAG" >> ${{ runner.temp }}/body.md
     - name: Create release
       id: create_release
       uses: actions/create-release@v1

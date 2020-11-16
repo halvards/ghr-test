@@ -30,7 +30,7 @@ steps:
   - .
   - --base-import-paths
   - --local
-  - --platform=all
+  - --platform=linux/amd64
 - id: tag-latest
   name: gcr.io/cloud-builders/docker
   args:
