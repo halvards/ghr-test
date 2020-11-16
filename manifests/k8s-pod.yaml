@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ghr-test
+spec:
+  containers:
+    - name: ghr-test
+      image: ko://github.com/halvards/ghr-test

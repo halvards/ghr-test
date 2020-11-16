@@ -14,12 +14,20 @@
 
 steps:
 - id: env
-  name: golang:1.15
+  name: $_GO_IMAGE
   entrypoint: go
   args:
   - env
+- id: unshallow
+  # name: $_GO_IMAGE
+  name: gcr.io/cloud-builders/gcloud
+  entrypoint: git
+  args:
+  - fetch
+  - --tags
+  - --unshallow
 - id: ko
-  name: golang:1.15
+  name: $_GO_IMAGE
   dir: tools
   entrypoint: go
   args:
@@ -28,16 +36,39 @@ steps:
   env:
   - 'GO111MODULE=on'
 - id: image
-  name: golang:1.15
-  entrypoint: /workspace/.gopath/bin/ko
+  name: $_GO_IMAGE
+  entrypoint: bash
   args:
-  - publish
-  - .
-  - --preserve-import-paths
-  - --platform=all
-  - --tags=latest,$_TAG_NAME
+  - -eEuo
+  - pipefail
+  - -c
+  - |-
+    /workspace/.gopath/bin/ko resolve --filename manifests --platform all --preserve-import-paths --tags latest,$_TAG_NAME | head -n-2 > deploy/ghr-test.yaml
   env:
   - 'KO_DOCKER_REPO=gcr.io/$_PROJECT_ID'
+- id: deploy-key
+  name: gcr.io/cloud-builders/gcloud
+  entrypoint: bash
+  args:
+  - -eEuo
+  - pipefail
+  - -c
+  - |-
+    gcloud secrets versions access latest --secret $_GITHUB_SECRET_NAME > /root/.ssh/id_github
+    chmod 600 /root/.ssh/id_github
+    cat << EOF > /root/.ssh/config
+    Hostname github.com
+    IdentityFile /root/.ssh/id_github
+    EOF
+    ssh-keyscan -t rsa github.com > /root/.ssh/known_hosts
+    # git config --add user.name "Cloud Build"
+    # git config --add user.email cloudbuild@example.com
+    git add deploy/ghr-test.yaml
+    git commit -m "Update deploy manifest for $_TAG_NAME" -u "Cloud Build" -e "cloudbuild@example.com"
+    git push origin main
+  # volumes:
+  # - name: 'ssh'
+  #   path: /root/.ssh
 options:
   dynamic_substitutions: true
   env:
@@ -49,6 +80,8 @@ options:
   - 'PROJECT_ID=$PROJECT_ID'
   logging: GCS_ONLY
 substitutions:
+  _GO_IMAGE: golang:1.15
+  _GITHUB_SECRET_NAME: ghr-test-github-deploy-key
   _PROJECT_ID: $PROJECT_ID
   _TAG_NAME: $TAG_NAME
 timeout: 600s
