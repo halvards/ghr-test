@@ -67,7 +67,7 @@ steps:
     git add deploy/ghr-test.yaml
     git commit -m "Update deploy manifest for $_TAG_NAME"
     git config -l
-    git push origin main
+    git push origin HEAD:refs/heads/main
   # volumes:
   # - name: 'ssh'
   #   path: /root/.ssh
