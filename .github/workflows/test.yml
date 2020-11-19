@@ -11,7 +11,7 @@ on:
     - main
 
 jobs:
-  unit:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,11 +30,6 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
-
-    - name: Lint
-      uses: golangci/golangci-lint-action@v2
-      with:
-        version: v2.3.0
 
     - name: Test
       run: go test -v -count=1 -race -timeout=10m -vet="asmdecl,assign,atomic,bools,buildtag,cgocall,composites,copylocks,errorsas,httpresponse,loopclosure,lostcancel,nilfunc,printf,shift,stdmethods,structtag,tests,unmarshal,unreachable,unsafeptr,unusedresult" ./...
