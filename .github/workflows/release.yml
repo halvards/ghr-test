@@ -1,40 +1,58 @@
 name: Release
+
 on:
   push:
     tags:
     - 'v*'
+
 jobs:
   build:
     name: Release
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+
     - name: Setup Go
       uses: actions/setup-go@v1
       with:
         go-version: 1.15
+
     - name: Env
       run: |
         go env
+
+    - name: Restore dependency cache
+      uses: actions/cache@v2
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
     - name: Names
       run: |
         echo MODULE_NAME=$(go list | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
         echo IMAGE_NAME=$(echo ${{ github.event.repository.name }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
         echo IMAGE_REPO=$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
         echo IMAGE_TAG=${GITHUB_REF##*/} >> $GITHUB_ENV
+
     - name: Build binaries
       run: |
         GOOS=darwin GOARCH=amd64 go build -o ghr-test_darwin_amd64 .
         GOOS=linux GOARCH=amd64 go build -o ghr-test_linux_amd64 .
         GOOS=linux GOARCH=arm64 go build -o ghr-test_linux_arm64 .
+
     - name: Create checksums
       run: shasum -a 256 ghr-test_* > SHA256SUMS
+
     - name: Install crane and ko
       run: |
         go get github.com/google/go-containerregistry/cmd/crane
         go get github.com/google/ko/cmd/ko
       working-directory: tools
+
     - name: Build and push container images
       run: |
         echo -n 'IMAGE_DIGEST=' >> $GITHUB_ENV
@@ -42,6 +60,7 @@ jobs:
         $(go env GOPATH)/bin/ko publish --base-import-paths --platform linux/amd64 --tags latest,$IMAGE_TAG . >> $GITHUB_ENV
       env:
         KO_DOCKER_REPO: docker.pkg.github.com/${{ env.IMAGE_REPO }}
+
     - name: Create release body file
       run: |
         echo '## Images' > ${{ runner.temp }}/body.md
@@ -49,6 +68,7 @@ jobs:
         echo "" >> ${{ runner.temp }}/body.md
         echo "    docker.pkg.github.com/$IMAGE_REPO/$IMAGE_NAME:$IMAGE_TAG (linux/amd64)" >> ${{ runner.temp }}/body.md
         echo "    ${IMAGE_DIGEST##*@}"
+
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
@@ -58,6 +78,7 @@ jobs:
         tag_name: ${{ github.ref }}
         release_name: ${{ github.ref }}
         body_path: ${{ runner.temp }}/body.md
+
     - name: Upload asset darwin amd64
       uses: actions/upload-release-asset@v1
       env:
@@ -67,6 +88,7 @@ jobs:
         asset_path: ghr-test_darwin_amd64
         asset_name: ghr-test_darwin_amd64
         asset_content_type: application/octet-stream
+
     - name: Upload binary linux amd64
       uses: actions/upload-release-asset@v1
       env:
@@ -76,6 +98,7 @@ jobs:
         asset_path: ghr-test_linux_amd64
         asset_name: ghr-test_linux_amd64
         asset_content_type: application/octet-stream
+
     - name: Upload binary linux arm64
       uses: actions/upload-release-asset@v1
       env:
@@ -85,6 +108,7 @@ jobs:
         asset_path: ghr-test_linux_arm64
         asset_name: ghr-test_linux_arm64
         asset_content_type: application/octet-stream
+
     - name: Upload checksum file
       uses: actions/upload-release-asset@v1
       env:

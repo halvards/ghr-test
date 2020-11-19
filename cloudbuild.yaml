@@ -19,7 +19,6 @@ steps:
   args:
   - env
 - id: unshallow
-  # name: $_GO_IMAGE
   name: gcr.io/cloud-builders/gcloud
   entrypoint: git
   args:
@@ -33,8 +32,6 @@ steps:
   args:
   - get
   - github.com/google/ko/cmd/ko
-  env:
-  - 'GO111MODULE=on'
 - id: image
   name: $_GO_IMAGE
   entrypoint: bash
@@ -64,20 +61,10 @@ steps:
     ssh-keyscan -t rsa github.com > /root/.ssh/known_hosts
     git config --add user.name "Cloud Build"
     git config --add user.email cloudbuild@example.com
-    # git config --unset credential.helper
     git add deploy/ghr-test.yaml
     git commit -m "Update deploy manifest for $TAG_NAME"
-    # echo before
-    # git config --list
-    # git config --global --list
-    # echo after
-    # git remote set-url origin git@github.com:halvards/ghr-test.git
     git remote set-url origin $(git remote get-url origin | sed -r 's:https\://([^/]+)/(.*\.git):git@\1\:\2:')
-    # git push origin main
     git push origin HEAD:refs/heads/main
-  # volumes:
-  # - name: 'ssh'
-  #   path: /root/.ssh
 options:
   dynamic_substitutions: true
   env:
