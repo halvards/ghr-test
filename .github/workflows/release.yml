@@ -58,6 +58,7 @@ jobs:
 
     - name: Build and push container images
       run: |
+        go env
         echo -n 'IMAGE_DIGEST=' >> $GITHUB_ENV
         $(go env GOPATH)/bin/crane auth login docker.pkg.github.com -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
         $(go env GOPATH)/bin/ko publish --base-import-paths --platform linux/amd64 --tags latest,$IMAGE_TAG . >> $GITHUB_ENV
