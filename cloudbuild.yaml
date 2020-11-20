@@ -72,6 +72,7 @@ options:
   - 'GOCACHE=/workspace/.gocache'
   - 'GOFLAGS=-mod=readonly -trimpath -ldflags=-s'
   - 'GOPATH=/workspace/.gopath'
+  - 'GOROOT=/usr/local/go'
   - 'TAG_NAME=$TAG_NAME'
   - 'PROJECT_ID=$PROJECT_ID'
   logging: GCS_ONLY
