@@ -9,6 +9,9 @@ jobs:
   build:
     name: Release
     runs-on: ubuntu-latest
+    env:
+      CGO_ENABLED: '0'
+      GOFLAGS: '-mod=readonly'
 
     steps:
     - name: Checkout code

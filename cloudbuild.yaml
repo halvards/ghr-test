@@ -40,31 +40,31 @@ steps:
   - pipefail
   - -c
   - |-
-    /workspace/.gopath/bin/ko resolve --filename manifests --platform all --preserve-import-paths --tags latest,$TAG_NAME | head -n-2 > deploy/ghr-test.yaml
+    /workspace/.gopath/bin/ko resolve --filename manifests --platform linux/amd64 --preserve-import-paths --tags latest,$TAG_NAME | head -n-2 > deploy/ghr-test.yaml
   env:
   - 'KO_DOCKER_REPO=gcr.io/$_PROJECT_ID'
-- id: manifest
-  name: gcr.io/cloud-builders/gcloud
-  entrypoint: bash
-  args:
-  - -eEuo
-  - pipefail
-  - -c
-  - |-
-    mkdir -p /root/.ssh
-    gcloud secrets versions access latest --secret $_GITHUB_SECRET_NAME > /root/.ssh/id_github
-    chmod 600 /root/.ssh/id_github
-    cat << EOF > /root/.ssh/config
-    Hostname github.com
-    IdentityFile /root/.ssh/id_github
-    EOF
-    ssh-keyscan -t rsa github.com > /root/.ssh/known_hosts
-    git config --add user.name "Cloud Build"
-    git config --add user.email cloudbuild@example.com
-    git add deploy/ghr-test.yaml
-    git commit -m "Update deploy manifest for $TAG_NAME"
-    git remote set-url origin $(git remote get-url origin | sed -r 's:https\://([^/]+)/(.*\.git):git@\1\:\2:')
-    git push origin HEAD:refs/heads/main
+# - id: manifest
+#   name: gcr.io/cloud-builders/gcloud
+#   entrypoint: bash
+#   args:
+#   - -eEuo
+#   - pipefail
+#   - -c
+#   - |-
+#     mkdir -p /root/.ssh
+#     gcloud secrets versions access latest --secret $_GITHUB_SECRET_NAME > /root/.ssh/id_github
+#     chmod 600 /root/.ssh/id_github
+#     cat << EOF > /root/.ssh/config
+#     Hostname github.com
+#     IdentityFile /root/.ssh/id_github
+#     EOF
+#     ssh-keyscan -t rsa github.com > /root/.ssh/known_hosts
+#     git config --add user.name "Cloud Build"
+#     git config --add user.email cloudbuild@example.com
+#     git add deploy/ghr-test.yaml
+#     git commit -m "Update deploy manifest for $TAG_NAME"
+#     git remote set-url origin $(git remote get-url origin | sed -r 's:https\://([^/]+)/(.*\.git):git@\1\:\2:')
+#     git push origin HEAD:refs/heads/main
 options:
   dynamic_substitutions: true
   env:
