@@ -70,7 +70,7 @@ options:
   env:
   - 'CGO_ENABLED=0'
   - 'GOCACHE=/workspace/.gocache'
-  - 'GOFLAGS=-mod=readonly -trimpath -ldflags=\'-s -w\''
+  - 'GOFLAGS=-mod=readonly -trimpath -ldflags=-s'
   - 'GOPATH=/workspace/.gopath'
   - 'TAG_NAME=$TAG_NAME'
   - 'PROJECT_ID=$PROJECT_ID'
