@@ -4,5 +4,5 @@ metadata:
   name: ghr-test
 spec:
   containers:
-    - name: ghr-test
-      image: ko://github.com/halvards/ghr-test
+  - name: ghr-test
+    image: ko://github.com/halvards/ghr-test # {"$kpt-set":"image"}

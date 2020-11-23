@@ -1,0 +1,16 @@
+apiVersion: kpt.dev/v1alpha1
+kind: Kptfile
+metadata:
+  name: manifests
+packageMetadata:
+  shortDescription: kpt package for ghr-test
+openAPI:
+  definitions:
+    io.k8s.cli.setters.image:
+      description: container image
+      x-k8s-cli:
+        setter:
+          name: image
+          value: ko://github.com/halvards/ghr-test
+          setBy: package-default
+          required: true
