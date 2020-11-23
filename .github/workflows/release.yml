@@ -35,7 +35,7 @@ jobs:
           ${{ runner.os }}-go-
 
     - name: Test
-      run: go test -v -count=1 -race -timeout=10m -vet="asmdecl,assign,atomic,bools,buildtag,cgocall,composites,copylocks,errorsas,httpresponse,loopclosure,lostcancel,nilfunc,printf,shift,stdmethods,structtag,tests,unmarshal,unreachable,unsafeptr,unusedresult" ./...
+      run: go test -v -count=1 -timeout=10m -vet="asmdecl,assign,atomic,bools,buildtag,cgocall,composites,copylocks,errorsas,httpresponse,loopclosure,lostcancel,nilfunc,printf,shift,stdmethods,structtag,tests,unmarshal,unreachable,unsafeptr,unusedresult" ./...
 
     - name: Build binaries
       run: |
