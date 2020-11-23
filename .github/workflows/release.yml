@@ -51,7 +51,8 @@ jobs:
         echo MODULE_NAME=$(go list | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
         echo IMAGE_NAME=$(echo ${{ github.event.repository.name }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
         echo IMAGE_REPO=$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
-        echo TAG_NAME=${${GITHUB_REF##*/}%%-*} >> $GITHUB_ENV
+        RC_TAG=${GITHUB_REF##*/}
+        echo TAG_NAME=${RC_TAG%%-rc*} >> $GITHUB_ENV
 
     - name: Install crane and ko
       run: |
