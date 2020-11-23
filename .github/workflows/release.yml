@@ -76,15 +76,15 @@ jobs:
     - name: Set new image tag
       uses: docker://gcr.io/kpt-dev/kpt:v0.37.0
       with:
-        args: cfg set manifests image docker.pkg.github.com/$IMAGE_REPO/$IMAGE_NAME:$TAG_NAME
+        args: cfg set manifests image docker.pkg.github.com/${{ env.IMAGE_REPO }}/${{ env.IMAGE_NAME }}:${{ env.TAG_NAME }}
 
     - name: Commit manifest with image tag
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
         git add manifests/k8s-pod.yaml
-        git commit -m "Image tag $TAG_NAME"
-        git push --set-upstream origin release-$TAG_NAME
+        git commit -m "$TAG_NAME"
+        git push --force origin release-$TAG_NAME
         echo COMMITISH=$(git rev-parse HEAD) >> $GITHUB_ENV
 
     - name: Create release body file
