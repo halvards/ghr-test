@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-    - 'v*'
+    - 'v*-rc*'
 
 jobs:
   build:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CGO_ENABLED: '0'
-      GOFLAGS: '-mod=readonly -trimpath -ldflags=-w'
+      GOFLAGS: '-mod=readonly'
 
     steps:
     - name: Checkout code
@@ -34,12 +34,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
 
-    - name: Names
-      run: |
-        echo MODULE_NAME=$(go list | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
-        echo IMAGE_NAME=$(echo ${{ github.event.repository.name }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
-        echo IMAGE_REPO=$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
-        echo IMAGE_TAG=${GITHUB_REF##*/} >> $GITHUB_ENV
+    - name: Test
+      run: go test -v -count=1 -race -timeout=10m -vet="asmdecl,assign,atomic,bools,buildtag,cgocall,composites,copylocks,errorsas,httpresponse,loopclosure,lostcancel,nilfunc,printf,shift,stdmethods,structtag,tests,unmarshal,unreachable,unsafeptr,unusedresult" ./...
 
     - name: Build binaries
       run: |
@@ -49,6 +45,13 @@ jobs:
 
     - name: Create checksums
       run: shasum -a 256 ghr-test_* > SHA256SUMS
+
+    - name: Names
+      run: |
+        echo MODULE_NAME=$(go list | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+        echo IMAGE_NAME=$(echo ${{ github.event.repository.name }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+        echo IMAGE_REPO=$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+        echo TAG_NAME=${${GITHUB_REF##*/}%%-*} >> $GITHUB_ENV
 
     - name: Install crane and ko
       run: |
@@ -61,17 +64,17 @@ jobs:
         go env
         echo -n 'IMAGE_DIGEST=' >> $GITHUB_ENV
         $(go env GOPATH)/bin/crane auth login docker.pkg.github.com -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-        $(go env GOPATH)/bin/ko publish --base-import-paths --platform linux/amd64 --tags latest,$IMAGE_TAG . >> $GITHUB_ENV
+        $(go env GOPATH)/bin/ko publish --base-import-paths --platform linux/amd64 --tags latest,$TAG_NAME . >> $GITHUB_ENV
       env:
         KO_DOCKER_REPO: docker.pkg.github.com/${{ env.IMAGE_REPO }}
 
     - name: Create release body file
       run: |
         echo '## Images' > ${{ runner.temp }}/body.md
-        echo "    gcr.io/project-id/$MODULE_NAME:$IMAGE_TAG (multi-arch)" >> ${{ runner.temp }}/body.md
-        echo "" >> ${{ runner.temp }}/body.md
-        echo "    docker.pkg.github.com/$IMAGE_REPO/$IMAGE_NAME:$IMAGE_TAG (linux/amd64)" >> ${{ runner.temp }}/body.md
+        echo "    docker.pkg.github.com/$IMAGE_REPO/$IMAGE_NAME:$TAG_NAME (linux/amd64)" >> ${{ runner.temp }}/body.md
         echo "    ${IMAGE_DIGEST##*@}"
+        echo "" >> ${{ runner.temp }}/body.md
+        echo "    gcr.io/\$GOOGLE_CLOUD_PROJECT/$MODULE_NAME:$TAG_NAME (multi-arch)" >> ${{ runner.temp }}/body.md
 
     - name: Create release
       id: create_release
@@ -79,8 +82,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: ${{ github.ref }}
+        tag_name: ${{ env.TAG_NAME }}
+        release_name: ${{ env.TAG_NAME }}
         body_path: ${{ runner.temp }}/body.md
 
     - name: Upload asset darwin amd64
