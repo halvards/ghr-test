@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/halvards/ghr-test/cmd/version"
+)
 
 func main() {
-	fmt.Println("hello world")
+	fmt.Printf("hello world %s\n", version.Get())
 }
