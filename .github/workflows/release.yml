@@ -40,7 +40,7 @@ jobs:
 
     - name: Set flags
       run: |
-        echo GOFLAGS=\"-mod=readonly -ldflags=-X=$(go list)/cmd/version.Version=$TAG_NAME\" >> $GITHUB_ENV
+        echo GOFLAGS="-mod=readonly -ldflags=-X=$(go list)/cmd/version.Version=$TAG_NAME" >> $GITHUB_ENV
 
     - name: Print env
       run: |
