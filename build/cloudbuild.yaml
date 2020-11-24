@@ -76,8 +76,8 @@ options:
   - 'CGO_ENABLED=0'
   - 'GOPATH=/workspace/.gopath'
   - 'GOROOT=/usr/local/go'
-  - 'TAG_NAME=$TAG_NAME'
   - 'PROJECT_ID=$PROJECT_ID'
+  - 'TAG_NAME=$TAG_NAME'
   logging: GCS_ONLY
   # substitutionOption: ALLOW_LOOSE
 substitutions:

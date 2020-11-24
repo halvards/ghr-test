@@ -6,8 +6,7 @@ on:
     - 'v*-rc*'
 
 jobs:
-  build:
-    name: Release
+  release:
     runs-on: ubuntu-latest
     env:
       CGO_ENABLED: '0'
