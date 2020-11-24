@@ -5,4 +5,4 @@ metadata:
 spec:
   containers:
   - name: ghr-test
-    image: ko://github.com/halvards/ghr-test # {"$kpt-set":"image"}
+    image: docker.pkg.github.com/halvards/ghr-test/ghr-test:v0.0.39 # {"$kpt-set":"image"}
