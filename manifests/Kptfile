@@ -11,6 +11,6 @@ openAPI:
       x-k8s-cli:
         setter:
           name: image
-          value: ko://github.com/halvards/ghr-test
-          setBy: package-default
+          value: docker.pkg.github.com/halvards/ghr-test/ghr-test:v0.1.1
           required: true
+          isSet: true
